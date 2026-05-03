@@ -1,0 +1,59 @@
+.heatmap-wrap {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.heatmap-grid {
+  display: grid;
+  gap: 2px;
+}
+
+.heatmap-cell-aspect {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.heatmap-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heatmap-label-col {
+  writing-mode: vertical-rl;
+  transform: rotate(-225deg);
+  white-space: nowrap;
+}
+
+.heatmap-legend-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.heatmap-legend-bar {
+  flex: 1;
+  height: 8px;
+  margin: 0 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--down), #ffffff, var(--accent));
+  border: 1px solid var(--rule);
+}
+
+.heatmap-legend-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 12px;
+  color: var(--ink-2);
+}

@@ -1,11 +1,13 @@
 "use client";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import StockSelector from "@/components/StockSelector";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import CorrelationHeatmap from "@/components/CorrelationHeatmap";
+import PageShell from "@/components/PageShell";
+import EmptyState from "@/components/EmptyState";
+import Skeleton from "@/components/Skeleton";
 import { getCorrelation } from "@/lib/api";
+import "@/styles/optimize.css";
 
 export default function CorrelationsPage() {
   const [stocks, setStocks] = useState([]);
@@ -24,7 +26,7 @@ export default function CorrelationsPage() {
       const result = await getCorrelation({ stocks, start_date: startDate, end_date: endDate });
       setData(result);
     } catch (e) {
-      setError(e.message);
+      setError("Something went wrong — check your connection or try different tickers.");
     } finally {
       setLoading(false);
     }
@@ -33,32 +35,51 @@ export default function CorrelationsPage() {
   return (
     <>
       <Navbar />
-      <main className="page-container">
-        <h1 className="section-title fade-in">Correlation Analysis</h1>
-        <p className="section-subtitle fade-in">Discover how your assets move together to find diversification opportunities.</p>
-
-        <div className="glass-card fade-in" style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
+      <div className="optimize-layout">
+        <aside className="optimize-sidebar">
           <StockSelector stocks={stocks} onStocksChange={setStocks} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1rem", alignItems: "end", marginTop: "1.25rem" }}>
-            <div className="input-group">
-              <label>Start Date</label>
-              <input type="date" className="input-field" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          
+          <div className="sidebar-params">
+            <div className="param-group">
+              <label className="param-label">Date range</label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input type="date" className="param-input" value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)} />
+                <input type="date" className="param-input" value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)} />
+              </div>
             </div>
-            <div className="input-group">
-              <label>End Date</label>
-              <input type="date" className="input-field" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-            </div>
-            <button className="btn btn-primary" onClick={handleAnalyze} disabled={loading || stocks.length < 2}>
-              {loading ? "Analyzing..." : "🔗 Analyze"}
-            </button>
-          </div>
-          {error && <p style={{ color: "var(--danger)", marginTop: "0.75rem", fontSize: "0.85rem" }}>{error}</p>}
-        </div>
 
-        {loading && <LoadingSpinner text="Computing correlation matrix..." />}
-        {data && <CorrelationHeatmap matrix={data.matrix} stocks={data.stocks} />}
-      </main>
-      <Footer />
+            <button 
+              className={`param-btn ${loading ? 'loading' : ''}`} 
+              onClick={handleAnalyze} 
+              disabled={loading || stocks.length < 2}
+            >
+              {loading ? "Analyzing…" : "Analyze correlations"}
+            </button>
+            {error && <div style={{ color: "var(--down)", fontSize: "12px", marginTop: "8px", fontWeight: 500, lineHeight: 1.4 }}>{error}</div>}
+          </div>
+        </aside>
+
+        <main className="optimize-main">
+          <PageShell
+            eyebrow={`Correlations · ${stocks.length} assets selected`}
+            heading="Correlation matrix"
+          >
+            {loading ? (
+              <div className="chart-wrap">
+                <Skeleton height="500px" />
+              </div>
+            ) : error && !data ? (
+              <EmptyState isError={true} message="Something went wrong — check your connection or try different tickers." />
+            ) : data ? (
+              <CorrelationHeatmap matrix={data.matrix} stocks={data.stocks} />
+            ) : (
+              <EmptyState message="Run analysis to see correlation matrix." />
+            )}
+          </PageShell>
+        </main>
+      </div>
     </>
   );
 }

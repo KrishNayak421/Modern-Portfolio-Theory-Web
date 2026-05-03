@@ -1,0 +1,132 @@
+.auth-page {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--page);
+  padding: 40px;
+}
+
+.auth-panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  width: 400px;
+  max-width: 100%;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+}
+
+.auth-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--ink);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-instrument), serif;
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.auth-title {
+  font-family: var(--font-instrument), serif;
+  font-size: 24px;
+  color: var(--ink);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-bottom: 32px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.auth-input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  padding: 0 12px;
+  background: var(--surface);
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.auth-btn {
+  width: 100%;
+  height: 40px;
+  background: var(--ink);
+  color: white;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-btn.loading {
+  animation: optimize-pulse 1.5s infinite;
+}
+
+.auth-footer {
+  margin-top: 24px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+.auth-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-error {
+  color: var(--down);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+  text-align: center;
+}
