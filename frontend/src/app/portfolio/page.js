@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Skeleton from "@/components/Skeleton";
 import { getSavedPortfolios, deleteSavedPortfolio } from "@/lib/api";
+import "@/styles/portfolio.css";
 
 export default function PortfolioPage() {
   const [portfolios, setPortfolios] = useState([]);
@@ -36,50 +37,79 @@ export default function PortfolioPage() {
   return (
     <>
       <Navbar />
-      <main className="page-container">
-        <h1 className="section-title fade-in">My Portfolios</h1>
-        <p className="section-subtitle fade-in">Your saved optimization results.</p>
+      <main className="portfolio-page">
+        <div className="portfolio-header">
+          <h1 className="portfolio-title">My portfolios</h1>
+          <p className="portfolio-subtitle">Portfolios saved from the optimizer</p>
+        </div>
 
-        {loading && <LoadingSpinner text="Loading portfolios..." />}
-        {error && (
-          <div className="glass-card fade-in" style={{ padding: "3rem", textAlign: "center" }}>
-            <p style={{ fontSize: "1.1rem", color: "var(--text-secondary)" }}>{error}</p>
-          </div>
-        )}
-
-        {!loading && !error && portfolios.length === 0 && (
-          <div className="glass-card fade-in" style={{ padding: "3rem", textAlign: "center" }}>
-            <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📂</p>
-            <p style={{ color: "var(--text-secondary)" }}>No saved portfolios yet. Run an optimization and save the results!</p>
-          </div>
-        )}
-
-        <div className="saved-grid">
-          {portfolios.map((p) => (
-            <div key={p.id} className="glass-card saved-card fade-in">
-              <h4>{p.name}</h4>
-              <p className="saved-card-meta">
-                Created {new Date(p.created_at).toLocaleDateString()}
-              </p>
-              <div className="saved-card-stocks">
-                {p.stocks.map((s) => (
-                  <span key={s} className="chip" style={{ fontSize: "0.72rem", padding: "0.2rem 0.6rem" }}>{s}</span>
-                ))}
-              </div>
-              {p.results?.max_sharpe && (
-                <div style={{ display: "flex", gap: "1rem", fontSize: "0.82rem", marginBottom: "0.75rem" }}>
-                  <span>Return: <strong style={{ color: "var(--success)" }}>{p.results.max_sharpe.annual_return}%</strong></span>
-                  <span>Sharpe: <strong style={{ color: "var(--accent-1)" }}>{p.results.max_sharpe.sharpe_ratio}</strong></span>
-                </div>
-              )}
-              <div className="saved-card-actions">
-                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
-              </div>
+        <div className="portfolio-panel">
+          {loading ? (
+            <div style={{ padding: "20px" }}>
+              <Skeleton height="32px" />
+              <div style={{ marginTop: "12px" }}><Skeleton height="48px" /></div>
+              <div style={{ marginTop: "12px" }}><Skeleton height="48px" /></div>
+              <div style={{ marginTop: "12px" }}><Skeleton height="48px" /></div>
             </div>
-          ))}
+          ) : error ? (
+            <div className="portfolio-empty">
+              <span className="portfolio-empty-text">
+                Sign in to view your saved portfolios — <Link href="/login" className="portfolio-empty-link">Sign in</Link>
+              </span>
+            </div>
+          ) : portfolios.length === 0 ? (
+            <div className="portfolio-empty">
+              <span className="portfolio-empty-text">
+                No saved portfolios yet. <Link href="/optimize" className="portfolio-empty-link">Run an optimization</Link> to save one.
+              </span>
+            </div>
+          ) : (
+            <table className="portfolio-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Created</th>
+                  <th>Assets</th>
+                  <th>Return</th>
+                  <th>Sharpe</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {portfolios.map((p) => {
+                  const maxChips = 4;
+                  const visibleAssets = p.stocks.slice(0, maxChips);
+                  const extraCount = p.stocks.length - maxChips;
+                  const ret = p.results?.max_sharpe?.annual_return;
+                  const sharpe = p.results?.max_sharpe?.sharpe_ratio;
+
+                  return (
+                    <tr key={p.id}>
+                      <td style={{ fontWeight: 500 }}>{p.name}</td>
+                      <td className="tabular var(--ink-2)">{new Date(p.created_at).toLocaleDateString()}</td>
+                      <td>
+                        {visibleAssets.map(s => (
+                          <span key={s} className="asset-chip">{s}</span>
+                        ))}
+                        {extraCount > 0 && <span className="asset-more">+{extraCount} more</span>}
+                      </td>
+                      <td className={`tabular ${ret >= 0 ? 'up' : 'down'}`} style={{ color: ret >= 0 ? "var(--up)" : "var(--down)" }}>
+                        {ret ? `${ret > 0 ? '+' : ''}${ret}%` : '--'}
+                      </td>
+                      <td className="tabular">{sharpe ? sharpe : '--'}</td>
+                      <td>
+                        <button className="action-delete" onClick={() => handleDelete(p.id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </main>
-      <Footer />
     </>
   );
 }

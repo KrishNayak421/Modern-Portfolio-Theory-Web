@@ -1,0 +1,44 @@
+:root {
+  /* Fonts */
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 28px;
+  --fs-2xl: 34px;
+
+  /* Colors */
+  --ink: #0f0f0f;
+  --ink-2: #525252;
+  --ink-3: #a3a3a3;
+  --rule: #e5e5e5;
+  --page: #fafaf8;
+  --surface: #ffffff;
+  --tag-bg: #f5f5f4;
+
+  --up: #1a6b3c;
+  --up-bg: #edf7f1;
+  --down: #b91c1c;
+  --down-bg: #fef2f2;
+
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --accent-hover: #1d4ed8;
+
+  /* Spacing */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+
+  /* Borders */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { loginUser } from "@/lib/api";
+import "@/styles/auth.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,30 +32,32 @@ export default function LoginPage() {
   return (
     <>
       <Navbar />
-      <div className="auth-container">
-        <div className="glass-card auth-card fade-in">
-          <h2>Welcome Back</h2>
+      <div className="auth-page">
+        <div className="auth-panel">
+          <div className="auth-mark">M</div>
+          <h2 className="auth-title">Sign in to your account</h2>
           <p className="auth-subtitle">Sign in to save and manage your portfolios</p>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <div className="input-group">
-              <label>Email</label>
-              <input type="email" className="input-field" value={email}
+            <div>
+              <label className="auth-label">Email</label>
+              <input type="email" className="auth-input" value={email}
                 onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required id="login-email" />
             </div>
-            <div className="input-group">
-              <label>Password</label>
-              <input type="password" className="input-field" value={password}
+            <div>
+              <label className="auth-label">Password</label>
+              <input type="password" className="auth-input" value={password}
                 onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required id="login-password" />
             </div>
-            {error && <p style={{ color: "var(--danger)", fontSize: "0.85rem" }}>{error}</p>}
-            <button type="submit" className="btn btn-primary" disabled={loading} id="login-submit">
-              {loading ? "Signing in..." : "Sign In"}
+            
+            <button type="submit" className={`auth-btn ${loading ? 'loading' : ''}`} disabled={loading} id="login-submit">
+              {loading ? "Signing in…" : "Sign in"}
             </button>
+            {error && <div className="auth-error">{error}</div>}
           </form>
 
           <p className="auth-footer">
-            Don't have an account? <Link href="/register">Create one</Link>
+            Don't have an account? <Link href="/register" className="auth-link">Create one</Link>
           </p>
         </div>
       </div>

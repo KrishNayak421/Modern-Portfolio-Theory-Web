@@ -1,13 +1,15 @@
 "use client";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import StockSelector from "@/components/StockSelector";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import EfficientFrontierChart from "@/components/EfficientFrontierChart";
 import AllocationTable from "@/components/AllocationTable";
 import PortfolioMetrics from "@/components/PortfolioMetrics";
+import PageShell from "@/components/PageShell";
+import EmptyState from "@/components/EmptyState";
+import Skeleton from "@/components/Skeleton";
 import { optimizePortfolio, savePortfolio } from "@/lib/api";
+import "@/styles/optimize.css";
 
 const BENCHMARKS = [
   { value: "^NSEI", label: "NIFTY 50" },
@@ -27,7 +29,7 @@ export default function OptimizePage() {
     risk_free_rate: 0,
     weight_lower_bound: 0,
     weight_upper_bound: 1,
-    num_portfolios: 5000,
+    num_portfolios: 10000,
     benchmark_ticker: "^NSEI",
   });
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,7 @@ export default function OptimizePage() {
       const data = await optimizePortfolio({ ...config, stocks });
       setResults(data);
     } catch (e) {
-      setError(e.message);
+      setError("Something went wrong — check your connection or try different tickers.");
     } finally {
       setLoading(false);
     }
@@ -71,97 +73,125 @@ export default function OptimizePage() {
   return (
     <>
       <Navbar />
-      <main className="page-container">
-        <h1 className="section-title fade-in">Portfolio Optimizer</h1>
-        <p className="section-subtitle fade-in">Configure your universe, set constraints, and find optimal allocations.</p>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }} className="fade-in">
-          {/* Left: Stock Selector */}
-          <div className="glass-card" style={{ padding: "1.5rem" }}>
-            <StockSelector stocks={stocks} onStocksChange={setStocks} />
-          </div>
-
-          {/* Right: Config */}
-          <div className="glass-card" style={{ padding: "1.5rem" }}>
-            <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "1rem" }}>Configuration</h3>
-            <div className="config-grid">
-              <div className="input-group">
-                <label>Start Date</label>
-                <input type="date" className="input-field" value={config.start_date}
+      <div className="optimize-layout">
+        <aside className="optimize-sidebar">
+          <StockSelector stocks={stocks} onStocksChange={setStocks} />
+          
+          <div className="sidebar-params">
+            <div className="param-group">
+              <label className="param-label">Date range</label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input type="date" className="param-input" value={config.start_date}
                   onChange={(e) => updateConfig("start_date", e.target.value)} />
-              </div>
-              <div className="input-group">
-                <label>End Date</label>
-                <input type="date" className="input-field" value={config.end_date}
+                <input type="date" className="param-input" value={config.end_date}
                   onChange={(e) => updateConfig("end_date", e.target.value)} />
               </div>
-              <div className="input-group">
-                <label>Risk-Free Rate</label>
-                <input type="number" className="input-field" step="0.01" min="0" max="0.5"
-                  value={config.risk_free_rate} onChange={(e) => updateConfig("risk_free_rate", parseFloat(e.target.value) || 0)} />
-              </div>
-              <div className="input-group">
-                <label>Benchmark</label>
-                <select className="input-field" value={config.benchmark_ticker}
-                  onChange={(e) => updateConfig("benchmark_ticker", e.target.value)}>
-                  {BENCHMARKS.map((b) => (
-                    <option key={b.value} value={b.value}>{b.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="input-group">
-                <label>Min Weight ({(config.weight_lower_bound * 100).toFixed(0)}%)</label>
-                <input type="range" className="input-field" min="0" max="0.5" step="0.01"
-                  value={config.weight_lower_bound} onChange={(e) => updateConfig("weight_lower_bound", parseFloat(e.target.value))}
-                  style={{ padding: "0.4rem" }} />
-              </div>
-              <div className="input-group">
-                <label>Max Weight ({(config.weight_upper_bound * 100).toFixed(0)}%)</label>
-                <input type="range" className="input-field" min="0.1" max="1" step="0.01"
-                  value={config.weight_upper_bound} onChange={(e) => updateConfig("weight_upper_bound", parseFloat(e.target.value))}
-                  style={{ padding: "0.4rem" }} />
-              </div>
-              <div className="input-group">
-                <label>Random Portfolios</label>
-                <input type="number" className="input-field" min="500" max="50000" step="500"
-                  value={config.num_portfolios} onChange={(e) => updateConfig("num_portfolios", parseInt(e.target.value) || 5000)} />
-              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Action */}
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", alignItems: "center" }}>
-          <button className="btn btn-primary" onClick={handleOptimize} disabled={loading || stocks.length < 2} id="optimize-btn">
-            {loading ? "Optimizing..." : "🚀 Run Optimization"}
-          </button>
-          {results && (
-            <button className="btn btn-secondary" onClick={handleSave}>
-              💾 Save Results
+            <div className="param-group">
+              <label className="param-label">Risk-free rate</label>
+              <input type="number" className="param-input tabular" step="0.01" min="0" max="0.5"
+                value={config.risk_free_rate} onChange={(e) => updateConfig("risk_free_rate", parseFloat(e.target.value) || 0)} />
+            </div>
+
+            <div className="param-group">
+              <label className="param-label">Benchmark</label>
+              <select className="param-input" value={config.benchmark_ticker}
+                onChange={(e) => updateConfig("benchmark_ticker", e.target.value)}>
+                {BENCHMARKS.map((b) => (
+                  <option key={b.value} value={b.value}>{b.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="param-group">
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <label className="param-label">Weight bounds</label>
+                <label className="param-label" style={{ textTransform: "none", color: "var(--ink)" }}>
+                  {(config.weight_lower_bound * 100).toFixed(0)}% – {(config.weight_upper_bound * 100).toFixed(0)}%
+                </label>
+              </div>
+              <input type="range" className="param-range" min="0" max="1" step="0.01"
+                value={config.weight_upper_bound} onChange={(e) => updateConfig("weight_upper_bound", parseFloat(e.target.value))} />
+            </div>
+
+            <div className="param-group">
+              <label className="param-label">Simulations</label>
+              <input type="number" className="param-input tabular" min="500" max="50000" step="500"
+                value={config.num_portfolios} onChange={(e) => updateConfig("num_portfolios", parseInt(e.target.value) || 10000)} />
+            </div>
+
+            <button 
+              className={`param-btn ${loading ? 'loading' : ''}`} 
+              onClick={handleOptimize} 
+              disabled={loading || stocks.length < 2}
+            >
+              {loading ? "Optimizing…" : "Run optimization"}
             </button>
-          )}
-          {saveMsg && <span style={{ fontSize: "0.85rem", color: "var(--success)", fontWeight: 600 }}>{saveMsg}</span>}
-          {error && <span style={{ fontSize: "0.85rem", color: "var(--danger)", fontWeight: 600 }}>{error}</span>}
-        </div>
-
-        {loading && <LoadingSpinner text="Fetching data & running optimization..." />}
-
-        {results && (
-          <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <PortfolioMetrics data={results.max_sharpe ? {
-              annual_return: results.max_sharpe.annual_return,
-              annual_volatility: results.max_sharpe.annual_volatility,
-              sharpe_ratio: results.max_sharpe.sharpe_ratio,
-              sortino_ratio: results.sortino_ratio,
-            } : null} />
-
-            <EfficientFrontierChart data={results} />
-
-            <AllocationTable maxSharpe={results.max_sharpe} minVol={results.min_volatility} />
+            {error && <div style={{ color: "var(--down)", fontSize: "12px", marginTop: "8px", fontWeight: 500, lineHeight: 1.4 }}>{error}</div>}
+            
+            {results && !loading && (
+              <>
+                <button className="btn-secondary-ghost" onClick={handleSave}>
+                  Save results
+                </button>
+                {saveMsg && <div style={{ color: "var(--up)", fontSize: "12px", marginTop: "8px", textAlign: "center", fontWeight: 500 }}>{saveMsg}</div>}
+              </>
+            )}
           </div>
-        )}
-      </main>
-      <Footer />
+        </aside>
+
+        <main className="optimize-main">
+          <PageShell
+            eyebrow={`Optimize · ${stocks.length} assets selected`}
+            heading="Efficient frontier"
+            headingItalic="& allocation"
+            sub="10,000 simulated portfolios · Yahoo Finance data · max-Sharpe & min-volatility"
+          >
+            {loading ? (
+              <>
+                <div className="metrics-row">
+                  <Skeleton height="100px" />
+                  <Skeleton height="100px" />
+                  <Skeleton height="100px" />
+                  <Skeleton height="100px" />
+                </div>
+                <div className="chart-wrap">
+                  <Skeleton height="340px" />
+                </div>
+                <div className="allocation-section">
+                  <Skeleton height="160px" />
+                  <Skeleton height="160px" />
+                </div>
+              </>
+            ) : error && !results ? (
+              <EmptyState isError={true} message="Something went wrong — check your connection or try different tickers." />
+            ) : results ? (
+              <>
+                <div className="metrics-row">
+                  <PortfolioMetrics data={results.max_sharpe ? {
+                    annual_return: results.max_sharpe.annual_return,
+                    annual_volatility: results.max_sharpe.annual_volatility,
+                    sharpe_ratio: results.max_sharpe.sharpe_ratio,
+                    sortino_ratio: results.sortino_ratio,
+                  } : null} />
+                </div>
+
+                <div className="chart-wrap">
+                  <div className="chart-header">Efficient frontier</div>
+                  <EfficientFrontierChart data={results} />
+                </div>
+
+                <div className="allocation-section">
+                  <AllocationTable maxSharpe={results.max_sharpe} minVol={results.min_volatility} />
+                </div>
+              </>
+            ) : (
+              <EmptyState message="Run optimization to see the efficient frontier." />
+            )}
+          </PageShell>
+        </main>
+      </div>
     </>
   );
 }

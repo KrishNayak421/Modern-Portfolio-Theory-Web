@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { registerUser } from "@/lib/api";
+import "@/styles/auth.css";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,35 +33,37 @@ export default function RegisterPage() {
   return (
     <>
       <Navbar />
-      <div className="auth-container">
-        <div className="glass-card auth-card fade-in">
-          <h2>Create Account</h2>
+      <div className="auth-page">
+        <div className="auth-panel">
+          <div className="auth-mark">M</div>
+          <h2 className="auth-title">Create an account</h2>
           <p className="auth-subtitle">Start optimizing your portfolio today</p>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <div className="input-group">
-              <label>Name</label>
-              <input type="text" className="input-field" value={name}
+            <div>
+              <label className="auth-label">Name</label>
+              <input type="text" className="auth-input" value={name}
                 onChange={(e) => setName(e.target.value)} placeholder="John Doe" required id="register-name" />
             </div>
-            <div className="input-group">
-              <label>Email</label>
-              <input type="email" className="input-field" value={email}
+            <div>
+              <label className="auth-label">Email</label>
+              <input type="email" className="auth-input" value={email}
                 onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required id="register-email" />
             </div>
-            <div className="input-group">
-              <label>Password</label>
-              <input type="password" className="input-field" value={password}
+            <div>
+              <label className="auth-label">Password</label>
+              <input type="password" className="auth-input" value={password}
                 onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" minLength={6} required id="register-password" />
             </div>
-            {error && <p style={{ color: "var(--danger)", fontSize: "0.85rem" }}>{error}</p>}
-            <button type="submit" className="btn btn-primary" disabled={loading} id="register-submit">
-              {loading ? "Creating..." : "Create Account"}
+            
+            <button type="submit" className={`auth-btn ${loading ? 'loading' : ''}`} disabled={loading} id="register-submit">
+              {loading ? "Creating account…" : "Create account"}
             </button>
+            {error && <div className="auth-error">{error}</div>}
           </form>
 
           <p className="auth-footer">
-            Already have an account? <Link href="/login">Sign in</Link>
+            Already have an account? <Link href="/login" className="auth-link">Sign in</Link>
           </p>
         </div>
       </div>

@@ -1,0 +1,33 @@
+.empty-state {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-message {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.empty-state.error .empty-message {
+  color: var(--down);
+}
+
+.empty-link {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.empty-link:hover {
+  text-decoration: underline;
+}

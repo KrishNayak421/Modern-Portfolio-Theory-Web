@@ -24,6 +24,10 @@ def fetch_stock_data(tickers: list[str], start: str, end: str):
         stock_data = stock_data.to_frame(name=tickers[0])
 
     daily_returns = stock_data.pct_change(fill_method=None).dropna()
+    
+    if daily_returns.empty:
+        raise ValueError("Could not fetch sufficient data. Some tickers may be invalid (e.g., use 'BRK-B' instead of 'BRK.B') or the date range is too narrow.")
+        
     mean_returns = daily_returns.mean()
     cov_matrix = daily_returns.cov()
 

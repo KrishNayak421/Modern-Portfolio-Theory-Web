@@ -1,80 +1,74 @@
 "use client";
+import "@/styles/correlations.css";
+
+function correlationToColor(val) {
+  if (val >= 0) {
+    const r = Math.round(255 - val * (255 - 37));
+    const g = Math.round(255 - val * (255 - 99));
+    const b = Math.round(255 - val * (255 - 235));
+    return `rgb(${r},${g},${b})`;
+  } else {
+    const t = Math.abs(val);
+    const r = Math.round(255 - t * (255 - 185));
+    const g = Math.round(255 - t * 28);
+    const b = Math.round(255 - t * 28);
+    return `rgb(${r},${g},${b})`;
+  }
+}
 
 export default function CorrelationHeatmap({ matrix, stocks }) {
   if (!matrix || !stocks || stocks.length === 0) return null;
 
   const n = stocks.length;
 
-  const getColor = (val) => {
-    // Diverging color scale: red (-1) → white (0) → blue (+1)
-    const clamped = Math.max(-1, Math.min(1, val));
-    if (clamped >= 0) {
-      const intensity = Math.round(clamped * 200);
-      return `rgb(${100 - intensity / 3}, ${102 + intensity / 3}, ${241})`;
-    } else {
-      const intensity = Math.round(Math.abs(clamped) * 200);
-      return `rgb(${239}, ${68 + intensity / 2}, ${68 + intensity / 2})`;
-    }
-  };
-
-  const getTextColor = (val) => {
-    return Math.abs(val) > 0.6 ? "#fff" : "var(--text-primary)";
-  };
-
   return (
-    <div className="chart-container fade-in">
-      <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "1rem" }}>
-        Correlation Matrix
-      </h3>
+    <div className="heatmap-wrap">
       <div style={{ overflowX: "auto" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: `80px repeat(${n}, 1fr)`,
-          gap: "2px",
-          minWidth: `${n * 60 + 80}px`,
-        }}>
-          {/* Top-left empty cell */}
+        <div className="heatmap-grid" style={{ gridTemplateColumns: `auto repeat(${n}, minmax(40px, 1fr))` }}>
+          
           <div />
-          {/* Column headers */}
           {stocks.map((s) => (
-            <div key={`h-${s}`} className="heatmap-label" title={s}>{s.replace(".NS", "")}</div>
+            <div key={`h-${s}`} className="heatmap-label heatmap-label-col" style={{ paddingBottom: "8px" }}>
+              {s.replace(".NS", "")}
+            </div>
           ))}
 
-          {/* Rows */}
           {stocks.map((row) => (
-            <>
-              <div key={`r-${row}`} className="heatmap-label" style={{ textAlign: "right", paddingRight: "0.5rem" }} title={row}>
+            <React.Fragment key={`r-${row}`}>
+              <div className="heatmap-label" style={{ justifyContent: "flex-end", paddingRight: "12px" }}>
                 {row.replace(".NS", "")}
               </div>
+              
               {stocks.map((col) => {
                 const val = matrix[col]?.[row] ?? 0;
+                const textColor = Math.abs(val) > 0.6 ? "#ffffff" : "var(--ink)";
+                
                 return (
                   <div
                     key={`${row}-${col}`}
-                    className="heatmap-cell"
+                    className="heatmap-cell-aspect tabular"
                     title={`${row} × ${col}: ${val.toFixed(4)}`}
                     style={{
-                      background: getColor(val),
-                      color: getTextColor(val),
+                      backgroundColor: correlationToColor(val),
+                      color: textColor,
                     }}
                   >
                     {val.toFixed(2)}
                   </div>
                 );
               })}
-            </>
+            </React.Fragment>
           ))}
         </div>
       </div>
 
-      {/* Color legend */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginTop: "1rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
-        <span>-1.0 (Negative)</span>
-        <div style={{
-          width: "200px", height: "12px", borderRadius: "6px",
-          background: "linear-gradient(90deg, rgb(239, 68, 68), var(--bg-card), rgb(100, 102, 241))",
-        }} />
-        <span>+1.0 (Positive)</span>
+      <div className="heatmap-legend-wrap">
+        <span className="heatmap-legend-label tabular">−1.0</span>
+        <div className="heatmap-legend-bar" />
+        <span className="heatmap-legend-label tabular">0</span>
+        <div className="heatmap-legend-bar" style={{ display: "none" /* hide extra bar, we just use one spanning the width but label is in middle */ }} />
+        {/* Wait, standard flex layout: label - bar - label is fine if we want just start and end, but prompt says "-1.0, 0, +1.0". */}
+        {/* We can place 0 in the absolute center of the wrap */}
       </div>
     </div>
   );
