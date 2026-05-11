@@ -141,20 +141,33 @@
 }
 
 .autosuggest-row {
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
   padding: 0 12px;
   height: 36px;
-  line-height: 36px;
-  text-align: left;
   background: none;
   border: none;
   border-bottom: 1px solid var(--rule);
   color: var(--ink);
   font-family: var(--font-inter), sans-serif;
-  font-weight: 500;
-  font-size: 13px;
   cursor: pointer;
+}
+
+.autosuggest-ticker {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.autosuggest-name {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  text-align: right;
 }
 
 .autosuggest-row:last-child {

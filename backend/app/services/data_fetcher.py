@@ -4,6 +4,7 @@ Yahoo Finance data fetching service.
 import yfinance as yf
 import pandas as pd
 import datetime as dt
+import requests
 
 
 def fetch_stock_data(tickers: list[str], start: str, end: str):
@@ -57,31 +58,72 @@ def fetch_benchmark(ticker: str, start: str, end: str):
 
 def search_tickers(query: str):
     """
-    Search for stock tickers using yfinance.
+    Search for stock tickers using Yahoo Finance's native search API.
     Returns a list of dicts with ticker info.
     """
     results = []
+    if not query:
+        return results
+        
     try:
-        ticker = yf.Ticker(query.upper())
-        info = ticker.info
-        if info and info.get('symbol'):
-            results.append({
-                "ticker": info.get('symbol', query.upper()),
-                "name": info.get('longName', info.get('shortName', 'Unknown')),
-                "exchange": info.get('exchange', 'Unknown'),
-                "type": info.get('quoteType', 'EQUITY'),
-            })
-    except Exception:
-        pass
-
-    # Try search as well
-    try:
-        search_results = yf.Tickers(query.upper())
-        # yfinance doesn't have a great search API, so we fall back to ticker info
-    except Exception:
-        pass
+        url = f"https://query2.finance.yahoo.com/v1/finance/search"
+        params = {"q": query, "quotesCount": 6, "newsCount": 0}
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        response = requests.get(url, params=params, headers=headers, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        
+        quotes = data.get("quotes", [])
+        for q in quotes:
+            # We mostly care about equities/ETFs, but let's allow all for now.
+            if "symbol" in q:
+                results.append({
+                    "ticker": q.get("symbol"),
+                    "name": q.get("shortname", q.get("longname", "Unknown")),
+                    "exchange": q.get("exchange", "Unknown"),
+                    "type": q.get("quoteType", "Unknown"),
+                })
+    except Exception as e:
+        print(f"Error searching tickers: {e}")
 
     return results
+
+def get_tickers_info(tickers: list[str]):
+    """
+    Fetch the latest price, name, and daily change for multiple tickers using yfinance.
+    """
+    if not tickers:
+        return {}
+        
+    result = {}
+    for symbol in tickers:
+        try:
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            
+            # yfinance info dict can vary, try a few common keys
+            price = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose") or 0.0
+            prev_close = info.get("previousClose") or price
+            
+            if prev_close and prev_close > 0:
+                change_percent = ((price - prev_close) / prev_close) * 100
+            else:
+                change_percent = 0.0
+                
+            name = info.get("shortName") or info.get("longName") or symbol
+            
+            result[symbol] = {
+                "name": name,
+                "price": float(price),
+                "change": float(change_percent),
+                "isUp": change_percent >= 0
+            }
+        except Exception as e:
+            print(f"Error fetching info for {symbol}: {e}")
+            
+    return result
 
 
 def validate_tickers(tickers: list[str]):

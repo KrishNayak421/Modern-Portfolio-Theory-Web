@@ -2,22 +2,14 @@
 import { useState, useRef, useEffect } from "react";
 import "@/styles/stockselector.css";
 
-// Dummy data for visual layout matching the prompt
-const DUMMY_PRICES = {
-  AAPL: { name: "Apple Inc.", price: "$173.50", change: "+1.24%", isUp: true },
-  MSFT: { name: "Microsoft Corp.", price: "$338.11", change: "+0.82%", isUp: true },
-  GOOGL: { name: "Alphabet Inc.", price: "$136.64", change: "-0.45%", isUp: false },
-  NVDA: { name: "NVIDIA Corp.", price: "$460.18", change: "+2.11%", isUp: true },
-  SPY: { name: "SPDR S&P 500", price: "$444.85", change: "+0.15%", isUp: true },
-  "BRK.B": { name: "Berkshire Hathaway", price: "$362.10", change: "-0.21%", isUp: false },
-};
 
 export default function StockSelector({ stocks, onStocksChange }) {
   const [input, setInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [stockInfo, setStockInfo] = useState({});
   const inputRef = useRef(null);
 
-  const POPULAR = ["AAPL", "MSFT", "GOOGL", "NVDA", "SPY", "BRK.B"];
+  const POPULAR = ["AAPL", "MSFT", "GOOGL", "NVDA", "SPY"];
 
   const addStock = (ticker) => {
     const t = ticker.toUpperCase().trim();
@@ -42,13 +34,50 @@ export default function StockSelector({ stocks, onStocksChange }) {
 
   useEffect(() => {
     if (input.length < 1) { setSuggestions([]); return; }
-    const q = input.toUpperCase();
-    const allTickers = ["AAPL", "MSFT", "GOOGL", "NVDA", "SPY", "BRK.B", "AMZN", "META", "TSLA", "NFLX"];
-    const filtered = allTickers.filter(
-      (t) => t.includes(q) && !stocks.includes(t)
-    ).slice(0, 6);
-    setSuggestions(filtered);
+
+    const fetchSuggestions = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/stocks/search?q=${input}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const filtered = data.results.filter(
+          (t) => !stocks.includes(t.ticker)
+        ).slice(0, 6);
+        setSuggestions(filtered);
+      } catch (err) {
+        console.error("Error fetching suggestions:", err);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutId);
   }, [input, stocks]);
+
+  useEffect(() => {
+    const stocksToFetch = stocks.filter(s => stockInfo[s] === undefined);
+    if (stocksToFetch.length === 0) return;
+
+    const fetchInfo = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/stocks/info?tickers=${stocksToFetch.join(",")}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        setStockInfo(prev => {
+          const newInfo = { ...prev };
+          stocksToFetch.forEach(s => {
+            newInfo[s] = data.results[s] || null;
+          });
+          return newInfo;
+        });
+      } catch (err) {
+        console.error("Error fetching stock info:", err);
+      }
+    };
+
+    fetchInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stocks]);
 
   return (
     <>
@@ -75,11 +104,12 @@ export default function StockSelector({ stocks, onStocksChange }) {
           <div className="autosuggest-panel">
             {suggestions.map((s) => (
               <button
-                key={s}
-                onClick={() => addStock(s)}
+                key={s.ticker}
+                onClick={() => addStock(s.ticker)}
                 className="autosuggest-row"
               >
-                {s}
+                <div className="autosuggest-ticker">{s.ticker}</div>
+                <div className="autosuggest-name">{s.name}</div>
               </button>
             ))}
           </div>
@@ -91,7 +121,22 @@ export default function StockSelector({ stocks, onStocksChange }) {
           <div className="sidebar-empty">Add tickers above to begin</div>
         ) : (
           stocks.map((s) => {
-            const data = DUMMY_PRICES[s] || { name: "Company Name", price: "$100.00", change: "+0.00%", isUp: true };
+            const info = stockInfo[s];
+            let data;
+            if (info) {
+              const sign = info.change >= 0 ? "+" : "";
+              data = {
+                name: info.name,
+                price: `$${info.price.toFixed(2)}`,
+                change: `${sign}${info.change.toFixed(2)}%`,
+                isUp: info.isUp
+              };
+            } else if (info === null) {
+              data = { name: "Company Name", price: "$100.00", change: "+0.00%", isUp: true };
+            } else {
+              data = { name: "Loading...", price: "...", change: "...", isUp: true };
+            }
+
             return (
               <div key={s} className="stock-row">
                 <div className="stock-left">
