@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
   (process.env.NODE_ENV === "production" 
     ? "https://incredible-warmth-production-151d.up.railway.app" 
     : "http://localhost:8000");

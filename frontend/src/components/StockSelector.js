@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import "@/styles/stockselector.css";
+import { API_BASE } from "@/lib/api";
 
 
 export default function StockSelector({ stocks, onStocksChange }) {
@@ -37,7 +38,7 @@ export default function StockSelector({ stocks, onStocksChange }) {
 
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/stocks/search?q=${input}`);
+        const res = await fetch(`${API_BASE}/api/stocks/search?q=${input}`);
         if (!res.ok) return;
         const data = await res.json();
         const filtered = data.results.filter(
@@ -59,7 +60,7 @@ export default function StockSelector({ stocks, onStocksChange }) {
 
     const fetchInfo = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/stocks/info?tickers=${stocksToFetch.join(",")}`);
+        const res = await fetch(`${API_BASE}/api/stocks/info?tickers=${stocksToFetch.join(",")}`);
         if (!res.ok) return;
         const data = await res.json();
 
