@@ -30,7 +30,10 @@ app = FastAPI(
 )
 
 # CORS
-origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+origins = os.getenv(
+    "CORS_ORIGINS", 
+    "http://localhost:3000,https://modern-portfolio-theory.up.railway.app"
+).split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in origins],
