@@ -32,7 +32,7 @@ app = FastAPI(
 # CORS
 origins = os.getenv(
     "CORS_ORIGINS", 
-    "http://localhost:3000,https://modern-portfolio-theory.up.railway.app"
+    "http://localhost:3000,https://modern-portfolio-theory.up.railway.app,https://modern-portfolio-theory-web-lnuk.vercel.app"
 ).split(",")
 app.add_middleware(
     CORSMiddleware,
