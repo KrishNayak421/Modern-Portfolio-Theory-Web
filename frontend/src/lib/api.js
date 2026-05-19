@@ -1,4 +1,7 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
+  (process.env.NODE_ENV === "production" 
+    ? "https://incredible-warmth-production-151d.up.railway.app" 
+    : "http://localhost:8000");
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
