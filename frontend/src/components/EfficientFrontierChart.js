@@ -3,7 +3,7 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, ComposedChart,
 } from "recharts";
-import { gridProps, axisProps, tooltipStyle } from "@/lib/chartDefaults";
+import { gridProps, xAxisProps, yAxisProps, tooltipWrapperStyle } from "@/lib/chartDefaults";
 
 const COLORS = {
   random: "rgba(0, 0, 0, 0.08)", // subtle ink
@@ -16,7 +16,7 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div style={tooltipStyle}>
+    <div style={tooltipWrapperStyle}>
       <div style={{ fontWeight: 600, marginBottom: "4px" }}>{d.label || "Portfolio"}</div>
       <div>Return: <strong>{d.ret?.toFixed(2)}%</strong></div>
       <div>Volatility: <strong>{d.vol?.toFixed(2)}%</strong></div>
@@ -49,12 +49,12 @@ export default function EfficientFrontierChart({ data }) {
         <XAxis
           dataKey="vol" type="number" name="Volatility"
           label={{ value: "Annualised Volatility (%)", position: "bottom", offset: -5, style: { fill: "var(--ink-3)", fontSize: 11, fontFamily: "var(--font-inter), sans-serif", fontWeight: 500 } }}
-          {...axisProps}
+          {...xAxisProps}
         />
         <YAxis
           dataKey="ret" type="number" name="Return"
           label={{ value: "Annualised Return (%)", angle: -90, position: "insideLeft", offset: 10, style: { fill: "var(--ink-3)", fontSize: 11, fontFamily: "var(--font-inter), sans-serif", fontWeight: 500 } }}
-          {...axisProps}
+          {...yAxisProps}
         />
         <Tooltip content={<CustomTooltip />} />
         

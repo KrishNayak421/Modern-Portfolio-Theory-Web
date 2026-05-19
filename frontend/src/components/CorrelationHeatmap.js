@@ -1,4 +1,5 @@
 "use client";
+import { Fragment } from "react";
 import "@/styles/correlations.css";
 
 function correlationToColor(val) {
@@ -34,7 +35,7 @@ export default function CorrelationHeatmap({ matrix, stocks }) {
           ))}
 
           {stocks.map((row) => (
-            <React.Fragment key={`r-${row}`}>
+            <Fragment key={`r-${row}`}>
               <div className="heatmap-label" style={{ justifyContent: "flex-end", paddingRight: "12px" }}>
                 {row.replace(".NS", "")}
               </div>
@@ -57,7 +58,7 @@ export default function CorrelationHeatmap({ matrix, stocks }) {
                   </div>
                 );
               })}
-            </React.Fragment>
+            </Fragment>
           ))}
         </div>
       </div>

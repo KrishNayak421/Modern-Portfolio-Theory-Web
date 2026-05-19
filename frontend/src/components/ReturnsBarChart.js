@@ -3,13 +3,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell, LabelList,
 } from "recharts";
-import { gridProps, axisProps, tooltipStyle } from "@/lib/chartDefaults";
+import { gridProps, xAxisProps, yAxisProps, tooltipWrapperStyle } from "@/lib/chartDefaults";
 
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div style={tooltipStyle}>
+    <div style={tooltipWrapperStyle}>
       <div style={{ fontWeight: 600, marginBottom: "4px" }}>{d.stock}</div>
       <div>Annualised Return: <strong>{d.value.toFixed(2)}%</strong></div>
     </div>
@@ -33,11 +33,11 @@ export default function ReturnsBarChart({ returns, stocks }) {
           <CartesianGrid {...gridProps} />
           <XAxis
             dataKey="stock"
-            {...axisProps}
+            {...xAxisProps}
           />
           <YAxis
             tickFormatter={(v) => `${v}%`}
-            {...axisProps}
+            {...yAxisProps}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--page)" }} />
           <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={50}>
